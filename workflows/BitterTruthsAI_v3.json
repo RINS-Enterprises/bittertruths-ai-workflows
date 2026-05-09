@@ -1,0 +1,269 @@
+{
+  "name": "BitterTruthsAI_v3",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "8e0ee37d-c15d-437c-addf-2ee82d3464de",
+      "name": "Telegram Input Trigger",
+      "webhookId": "d6363607-2b46-44bb-936b-d94d55d0f661",
+      "credentials": {
+        "telegramApi": {
+          "id": "hLtasTjjWM3HmaaT",
+          "name": "Bitter Truths Daily Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a viral short-form content strategist.\n\nGenerate a Facebook/Instagram reel content package.\n\nTOPIC:\n{{ $('Parse User Input').item.json.topic }}\n\nSTYLE MODE:\n{{ $('Parse User Input').item.json.mode }}\n\nPossible modes:\n- dark\n- cinematic\n- aggressive\n- emotional\n- disciplined\n- stoic\n\nGenerate:\n\n🔥 HOOK:\nA powerful scroll-stopping hook.\n\n🎬 REEL SCRIPT:\nShort cinematic narration.\n\n📝 CAPTION:\nShort engaging caption.\n\n🏷 HASHTAGS:\nRelevant viral hashtags.\n\n🖼 IMAGE IDEA:\nA cinematic AI image concept matching the tone.\n\nRules:\n- Avoid cringe\n- Avoid fake guru language\n- Make it emotionally strong\n- Make it realistic and modern",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        448,
+        0
+      ],
+      "id": "fda911fb-1ac0-4164-88ee-b0515be5939e",
+      "name": "Generate Viral Content"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        528,
+        224
+      ],
+      "id": "63b17132-2aa2-4f8f-ae9a-7054f2befc02",
+      "name": "Gemini 2.5 Flash Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "hVOZEqqHJySXAORn",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Input Trigger').item.json.message.chat.id }}",
+        "text": "={{ $('Generate Viral Content').item.json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1472,
+        0
+      ],
+      "id": "19470c23-f0f3-46a7-8779-0ae1c7a84a3c",
+      "name": "Send Generated Content",
+      "webhookId": "a403b273-8b40-4e71-b097-6f7b92b6f2b5",
+      "credentials": {
+        "telegramApi": {
+          "id": "hLtasTjjWM3HmaaT",
+          "name": "Bitter Truths Daily Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2877cb45-8716-48f4-b3cd-a608618efb34",
+              "name": "topic",
+              "value": "={{ $json.message.text.split('|')[0].trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "eff5e8f8-9de0-4157-bbca-81e5a5b37c27",
+              "name": "=mode",
+              "value": "{{ $json.message.text.split('|')[1]?.trim() || 'dark' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        0
+      ],
+      "id": "74add2a3-aae7-4a20-830d-f81efda4cdca",
+      "name": "Parse User Input"
+    },
+    {
+      "parameters": {
+        "operation": "sendPhoto",
+        "chatId": "={{ $('Telegram Input Trigger').item.json.message.chat.id }}",
+        "binaryData": true,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1248,
+        0
+      ],
+      "id": "78ab1d60-0a61-411f-a778-377440935696",
+      "name": "Send a photo message",
+      "webhookId": "6b0ea3e8-349a-418a-90c0-34b6729d07cf",
+      "credentials": {
+        "telegramApi": {
+          "id": "hLtasTjjWM3HmaaT",
+          "name": "Bitter Truths Daily Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const parts = $json.candidates[0].content.parts;\n\nconst imagePart = parts.find(p => p.inlineData);\n\nreturn [\n  {\n    binary: {\n      data: {\n        data: Buffer.from(imagePart.inlineData.data, 'base64'),\n        mimeType: imagePart.inlineData.mimeType,\n        fileName: 'gemini-image.png'\n      }\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1024,
+        0
+      ],
+      "id": "ec798d8d-d0fe-4e89-a262-34a26dca7a46",
+      "name": "Convert Base64 Image"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googlePalmApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n{\n  \"contents\": [\n    {\n      \"parts\": [\n        {\n          \"text\": \"Create a cinematic vertical social media image. TOPIC: \" + $('Parse User Input').item.json.topic + \". STYLE: \" + $('Parse User Input').item.json.mode + \". VISUAL DIRECTION: \" + $('Generate Viral Content').item.json.output + \". Make it emotionally powerful, highly cinematic, dramatic lighting, vertical composition, realistic textures, social-media-ready.\"\n        }\n      ]\n    }\n  ],\n  \"generationConfig\": {\n    \"responseModalities\": [\"TEXT\", \"IMAGE\"]\n  }\n}\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        800,
+        0
+      ],
+      "id": "cf754f2a-6cf3-41c5-8281-7b9a3652fccc",
+      "name": "Generate Gemini Image",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "hVOZEqqHJySXAORn",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Input Trigger": {
+      "main": [
+        [
+          {
+            "node": "Parse User Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Viral Content": {
+      "main": [
+        [
+          {
+            "node": "Generate Gemini Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini 2.5 Flash Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Viral Content",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse User Input": {
+      "main": [
+        [
+          {
+            "node": "Generate Viral Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a photo message": {
+      "main": [
+        [
+          {
+            "node": "Send Generated Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert Base64 Image": {
+      "main": [
+        [
+          {
+            "node": "Send a photo message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Gemini Image": {
+      "main": [
+        [
+          {
+            "node": "Convert Base64 Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "355f8baa-4162-42a0-a58e-88e7e0251fb2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5bab77a6997b4a9e6279bfc1fd7f4108114ecce8375dd66a2a3a049be76e2f0b"
+  },
+  "id": "PguqWK4fKx8jPGJs",
+  "tags": []
+}
