@@ -1,0 +1,133 @@
+{
+  "name": "BitterTruthsAI_v1",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -320,
+        -160
+      ],
+      "id": "091b5cdc-25e0-4f7e-acfc-60f1ef71977e",
+      "name": "Telegram Input Trigger",
+      "webhookId": "f8014e13-c973-491d-8827-f9addd48daae",
+      "credentials": {
+        "telegramApi": {
+          "id": "EDgLIeg4NfpiW4A7",
+          "name": "bittertruths_ai_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a viral dark motivation content strategist.\n\nGenerate a Facebook/Instagram reel content package.\n\nTopic:\n{{ $('Telegram Input Trigger').item.json.message.text }}\n\nStyle:\nDark motivation, emotionally intense, disciplined, cinematic, realistic.\n\nAvoid:\n- cringe quotes\n- fake hustle culture\n- exaggerated guru language\n\nFormat EXACTLY like this:\n\n🔥 HOOK:\n[1 powerful scroll-stopping hook]\n\n🎬 REEL SCRIPT:\n[Short reel narration]\n\n📝 CAPTION:\n[Short engaging caption]\n\n🏷 HASHTAGS:\n[#hashtags]\n\n🖼 IMAGE IDEA:\n[Cinematic AI visual idea]",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -96,
+        -160
+      ],
+      "id": "14d19a5d-8b83-4857-b440-793c749fd571",
+      "name": "Generate Viral Content"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -96,
+        80
+      ],
+      "id": "398adafd-c6dc-4608-a9db-e8ae188322df",
+      "name": "Gemini 2.5 Flash Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "OLFVcgju88IqR3k6",
+          "name": "Bitter Truths Daily"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Input Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        256,
+        -160
+      ],
+      "id": "fcc58bb8-9bce-4134-b370-681791b4ca57",
+      "name": "Send Generated Content",
+      "webhookId": "d4297518-19d0-41bf-acd6-af7abafbfedd",
+      "credentials": {
+        "telegramApi": {
+          "id": "EDgLIeg4NfpiW4A7",
+          "name": "bittertruths_ai_bot"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Input Trigger": {
+      "main": [
+        [
+          {
+            "node": "Generate Viral Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Viral Content": {
+      "main": [
+        [
+          {
+            "node": "Send Generated Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini 2.5 Flash Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Viral Content",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "69522c5f-7a83-41a7-93ed-57f923ef1f85",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4c0286c542b0e0845c3941a3332fdc299df0f02485cb8e39e5279901861a16f1"
+  },
+  "id": "946Uv0utOWGbv7TH",
+  "tags": []
+}
