@@ -47,7 +47,7 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1.1,
       "position": [
-        200,
+        208,
         64
       ],
       "id": "4c128539-09f9-426f-82bf-9d6285a530ca",
@@ -109,7 +109,7 @@
         -160
       ],
       "id": "c247a86f-f1e3-4709-a594-8c93fcb30ab0",
-      "name": "Edit Fields"
+      "name": "Parse User Input"
     }
   ],
   "pinData": {},
@@ -118,7 +118,7 @@
       "main": [
         [
           {
-            "node": "Edit Fields",
+            "node": "Parse User Input",
             "type": "main",
             "index": 0
           }
@@ -147,7 +147,7 @@
         ]
       ]
     },
-    "Edit Fields": {
+    "Parse User Input": {
       "main": [
         [
           {
@@ -165,7 +165,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "6c9d915d-dd8c-4fc2-be57-98f0782a7f28",
+  "versionId": "d382ba9c-e7f9-4a4e-af3f-e4354ae674bc",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "4c0286c542b0e0845c3941a3332fdc299df0f02485cb8e39e5279901861a16f1"
